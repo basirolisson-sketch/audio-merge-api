@@ -1,8 +1,9 @@
-from flask import Flask, request, send_file
+from flask import Flask, request, send_file, jsonify
 import subprocess
 import os
+import uuid
 
-app = Flask(_name_)
+app = Flask(__name__)
 
 @app.route("/")
 def home():
@@ -10,33 +11,49 @@ def home():
 
 @app.route("/merge", methods=["POST"])
 def merge_audio():
+
+    if "files" not in request.files:
+        return jsonify({"error": "No files uploaded"}), 400
+
     files = request.files.getlist("files")
 
+    if len(files) < 2:
+        return jsonify({"error": "Upload at least 2 files"}), 400
+
+    temp_id = str(uuid.uuid4())
     paths = []
 
     for i, file in enumerate(files):
-        path = f"/tmp/input{i}.mp3"
+        path = f"/tmp/{temp_id}_{i}.mp3"
         file.save(path)
         paths.append(path)
 
-    list_file = "/tmp/list.txt"
+    list_file = f"/tmp/{temp_id}_list.txt"
 
     with open(list_file, "w") as f:
         for p in paths:
             f.write(f"file '{p}'\n")
 
-    output = "/tmp/output.mp3"
+    output = f"/tmp/{temp_id}_output.mp3"
 
-    subprocess.run([
+    cmd = [
         "ffmpeg",
+        "-y",
         "-f", "concat",
         "-safe", "0",
         "-i", list_file,
         "-c", "copy",
         output
-    ])
+    ]
 
-    return send_file(output, mimetype="audio/mpeg", as_attachment=True, download_name="merged.mp3")
+    subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
-if _name_ == "_main_":
+    return send_file(
+        output,
+        mimetype="audio/mpeg",
+        as_attachment=True,
+        download_name="merged.mp3"
+    )
+
+if __name__ == "__main__":
     app.run(host="0.0.0.0", port=10000)

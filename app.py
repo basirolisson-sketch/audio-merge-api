@@ -2,7 +2,7 @@ from flask import Flask, request, send_file
 import subprocess
 import os
 
-app = Flask(_name_)
+app = Flask(__name__)
 
 @app.route("/")
 def home():

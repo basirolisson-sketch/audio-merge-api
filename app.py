@@ -2,14 +2,17 @@ from flask import Flask, request, send_file
 import subprocess
 import os
 
-app = Flask(__name__)
+app = Flask(_name_)
+
 
 @app.route("/")
 def home():
     return {"status": "ok"}
 
+
 @app.route("/merge", methods=["POST"])
 def merge_audio():
+
     files = request.files.getlist("files")
 
     paths = []
@@ -29,14 +32,19 @@ def merge_audio():
 
     subprocess.run([
         "ffmpeg",
-        "-f","concat",
-        "-safe","0",
-        "-i",list_file,
-        "-c","copy",
+        "-f", "concat",
+        "-safe", "0",
+        "-i", list_file,
+        "-c", "copy",
         output
     ])
 
-    return send_file(output, mimetype="audio/mpeg", as_attachment=True, download_name="merged.mp3")
+    return send_file(
+        output,
+        mimetype="audio/mpeg",
+        as_attachment=True,
+        download_name="merged.mp3"
+    )
 
 
 if _name_ == "_main_":

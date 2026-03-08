@@ -4,15 +4,12 @@ import os
 
 app = Flask(_name_)
 
-
 @app.route("/")
 def home():
     return {"status": "ok"}
 
-
 @app.route("/merge", methods=["POST"])
 def merge_audio():
-
     files = request.files.getlist("files")
 
     paths = []
@@ -39,13 +36,7 @@ def merge_audio():
         output
     ])
 
-    return send_file(
-        output,
-        mimetype="audio/mpeg",
-        as_attachment=True,
-        download_name="merged.mp3"
-    )
-
+    return send_file(output, mimetype="audio/mpeg", as_attachment=True, download_name="merged.mp3")
 
 if _name_ == "_main_":
     app.run(host="0.0.0.0", port=10000)
